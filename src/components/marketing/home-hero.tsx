@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Play, Sparkles, Star, Utensils, QrCode, ChefHat } from "lucide-react";
+import { ArrowRight, Play, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function HomeHero() {
@@ -60,76 +59,8 @@ export function HomeHero() {
             </div>
           </div>
         </div>
-
-        {/* Horizon Glow Separation Line */}
-        <div className="mt-14 h-px w-full bg-gradient-to-r from-transparent via-orange-400/40 to-transparent" />
-
-        {/* Social Proof & 3D Feature Pills Bar */}
-        <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          {/* Avatar & Rating Strip */}
-          <div className="flex items-center gap-4">
-            <div className="flex -space-x-2.5 overflow-hidden">
-              <Image
-                width={40}
-                height={40}
-                className="inline-block h-10 w-10 rounded-full ring-2 ring-[#071117] object-cover"
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
-                alt="Restaurant Owner"
-              />
-              <Image
-                width={40}
-                height={40}
-                className="inline-block h-10 w-10 rounded-full ring-2 ring-[#071117] object-cover"
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80"
-                alt="Chef"
-              />
-              <Image
-                width={40}
-                height={40}
-                className="inline-block h-10 w-10 rounded-full ring-2 ring-[#071117] object-cover"
-                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80"
-                alt="Cafe Owner"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-              <p className="mt-0.5 text-xs font-semibold text-zinc-300">
-                1,500+ happy restaurants & cafes
-              </p>
-            </div>
-
-            <Link 
-              href="/pricing" 
-              className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-orange-300 hover:text-white underline underline-offset-4 ml-2 transition"
-            >
-              Explore Platform →
-            </Link>
-          </div>
-
-          {/* 3 Soft 3D Capsule Badges */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-2xl border border-amber-500/25 bg-amber-500/10 px-3.5 py-2 text-xs font-semibold text-amber-200 backdrop-blur-md">
-              <QrCode className="h-4 w-4 text-amber-400" />
-              <span>QR Ordering</span>
-            </div>
-
-            <div className="flex items-center gap-2 rounded-2xl border border-rose-500/25 bg-rose-500/10 px-3.5 py-2 text-xs font-semibold text-rose-200 backdrop-blur-md">
-              <Utensils className="h-4 w-4 text-rose-400" />
-              <span>Direct UPI</span>
-            </div>
-
-            <div className="flex items-center gap-2 rounded-2xl border border-orange-500/25 bg-orange-500/10 px-3.5 py-2 text-xs font-semibold text-orange-200 backdrop-blur-md">
-              <ChefHat className="h-4 w-4 text-orange-400" />
-              <span>Live KDS</span>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
 }
+
