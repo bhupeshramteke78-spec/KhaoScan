@@ -300,6 +300,13 @@ async function getRestaurants(query: string, category: string, userLocation: Coo
         restaurant.type.toLowerCase().includes(normalizedQuery) ||
         restaurant.cuisine.some((item) => item.toLowerCase().includes(normalizedQuery))
       );
+    })
+    .sort((a, b) => {
+      if (!userLocation) return 0;
+      if (a.distanceKm == null && b.distanceKm == null) return 0;
+      if (a.distanceKm == null) return 1;
+      if (b.distanceKm == null) return -1;
+      return a.distanceKm - b.distanceKm;
     });
 }
 
