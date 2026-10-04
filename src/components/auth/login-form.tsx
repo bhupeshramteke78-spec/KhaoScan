@@ -38,24 +38,45 @@ export function LoginForm({ redirectTo = "/dashboard" }: { redirectTo?: string }
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-3">
-      <label className="floating-field">
-        <Input className="floating-input" type="email" placeholder=" " {...form.register("email")} />
-        <span className="floating-label">Email</span>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+      <div className="grid gap-1.5">
+        <label className="text-xs font-semibold text-zinc-300">Email Address</label>
+        <Input
+          type="email"
+          placeholder="owner@restaurant.com"
+          autoComplete="email"
+          className="h-12 rounded-xl border border-white/15 bg-white/[0.04] px-4 text-sm text-white placeholder:text-zinc-500 focus:border-orange-400 focus:bg-white/[0.07] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+          {...form.register("email")}
+        />
         {form.formState.errors.email?.message ? (
-          <span className="mt-1 block text-xs text-rose-500">{form.formState.errors.email.message}</span>
+          <span className="text-xs text-rose-400">{form.formState.errors.email.message}</span>
         ) : null}
-      </label>
-      <label className="floating-field">
-        <Input className="floating-input" type="password" placeholder=" " {...form.register("password")} />
-        <span className="floating-label">Password</span>
+      </div>
+
+      <div className="grid gap-1.5">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-semibold text-zinc-300">Password</label>
+        </div>
+        <Input
+          type="password"
+          placeholder="••••••••••••"
+          autoComplete="current-password"
+          className="h-12 rounded-xl border border-white/15 bg-white/[0.04] px-4 text-sm text-white placeholder:text-zinc-500 focus:border-orange-400 focus:bg-white/[0.07] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+          {...form.register("password")}
+        />
         {form.formState.errors.password?.message ? (
-          <span className="mt-1 block text-xs text-rose-500">{form.formState.errors.password.message}</span>
+          <span className="text-xs text-rose-400">{form.formState.errors.password.message}</span>
         ) : null}
-      </label>
-      <Button type="submit" size="lg" disabled={isSubmitting} className="mt-1">
-        {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-        Login
+      </div>
+
+      <Button
+        type="submit"
+        size="lg"
+        disabled={isSubmitting}
+        className="mt-2 h-12 w-full rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-orange-600 text-sm font-bold text-white shadow-lg shadow-orange-500/25 hover:opacity-95 hover:scale-[1.01] active:scale-[0.99] transition duration-150 cursor-pointer"
+      >
+        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+        Sign In to Owner Dashboard
       </Button>
     </form>
   );

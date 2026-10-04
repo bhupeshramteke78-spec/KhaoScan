@@ -98,19 +98,24 @@ export function OwnerRegistrationForm() {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-3 sm:grid-cols-2">
+    <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-3.5 sm:grid-cols-2">
       {fields.map((field) => (
-        <label key={field.name} className={`floating-field ${field.name === "address" ? "sm:col-span-2" : ""}`}>
-          <Input className="floating-input" type={field.type} placeholder=" " {...form.register(field.name)} />
-          <span className="floating-label">
-            {field.label}
-            {field.required ? <span className="ml-0.5 text-red-500">*</span> : null}
-          </span>
+        <div key={field.name} className={`grid gap-1.5 ${field.name === "address" ? "sm:col-span-2" : ""}`}>
+          <label className="text-xs font-semibold text-zinc-300">
+            {field.label} {field.required ? <span className="text-orange-400">*</span> : null}
+          </label>
+          <Input
+            type={field.type}
+            placeholder={field.placeholder}
+            className="h-11 rounded-xl border border-white/15 bg-white/[0.04] px-3.5 text-sm text-white placeholder:text-zinc-500 focus:border-orange-400 focus:bg-white/[0.07] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            {...form.register(field.name)}
+          />
           {form.formState.errors[field.name]?.message ? (
-            <span className="mt-1 block text-xs text-rose-300">{form.formState.errors[field.name]?.message}</span>
+            <span className="text-xs text-rose-400">{form.formState.errors[field.name]?.message}</span>
           ) : null}
-        </label>
+        </div>
       ))}
+
       <VerificationFileField
         label="FSSAI certificate"
         required
@@ -123,15 +128,23 @@ export function OwnerRegistrationForm() {
         accept="image/jpeg,image/png,image/webp"
         onChange={setStorefrontPhoto}
       />
-      <VerificationFileField
-        label="Business proof"
-        accept="application/pdf,image/jpeg,image/png,image/webp"
-        onChange={setBusinessProof}
-      />
       <div className="sm:col-span-2">
-        <Button type="submit" size="lg" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          Create restaurant
+        <VerificationFileField
+          label="Business proof (optional)"
+          accept="application/pdf,image/jpeg,image/png,image/webp"
+          onChange={setBusinessProof}
+        />
+      </div>
+
+      <div className="mt-3 sm:col-span-2">
+        <Button
+          type="submit"
+          size="lg"
+          disabled={isSubmitting}
+          className="h-12 w-full rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-orange-600 text-sm font-bold text-white shadow-lg shadow-orange-500/25 hover:opacity-95 hover:scale-[1.01] active:scale-[0.99] transition duration-150 cursor-pointer"
+        >
+          {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          Create Restaurant & Start Free Trial
         </Button>
       </div>
     </form>
@@ -150,19 +163,19 @@ function VerificationFileField({
   onChange: (file: File | null) => void;
 }) {
   return (
-    <label className="grid gap-2 rounded-lg border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-700">
-      <span className="font-medium">
+    <div className="grid gap-1.5 rounded-xl border border-white/15 bg-white/[0.03] p-3.5 text-sm text-zinc-300 transition hover:border-white/25">
+      <span className="text-xs font-semibold text-zinc-200">
         {label}
-        {required ? <span className="ml-0.5 text-red-500">*</span> : null}
+        {required ? <span className="ml-1 text-orange-400">*</span> : null}
       </span>
       <Input
         type="file"
         accept={accept}
         required={required}
-        className="h-auto border-0 p-0 file:mr-3 file:rounded-md file:border-0 file:bg-zinc-950 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white"
+        className="h-auto border-0 bg-transparent p-0 text-xs text-zinc-400 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-amber-500 file:to-orange-600 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white hover:file:opacity-90"
         onChange={(event) => onChange(event.target.files?.[0] ?? null)}
       />
-      <span className="text-xs text-zinc-500">PDF, JPEG, PNG, or WebP. Maximum 1.2 MB.</span>
-    </label>
+      <span className="text-[11px] text-zinc-500">PDF, JPEG, PNG, or WebP. Max 1.2 MB.</span>
+    </div>
   );
 }
