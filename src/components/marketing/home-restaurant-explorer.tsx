@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
-import { LocateFixed, MapPin, Search, Star, Table2 } from "lucide-react";
+import { LocateFixed, MapPin, Search, Star, Table2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -14,6 +14,7 @@ import { getBrowserLocation, getBrowserLocationMessage } from "@/lib/browser-loc
 import { formatDistance, getDistanceKm, hasCoordinates, type Coordinates } from "@/lib/geo";
 
 const filters = ["All", "Pure Veg", "Cafe", "Family", "Fine Dining", "Desserts"];
+const MAX_NEARBY_RADIUS_KM = 35;
 
 export function HomeRestaurantExplorer({ restaurants }: { restaurants: HomeRestaurant[] }) {
   const router = useRouter();
@@ -22,6 +23,7 @@ export function HomeRestaurantExplorer({ restaurants }: { restaurants: HomeResta
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "failed">("idle");
   const [locationMessage, setLocationMessage] = useState("");
+
   const filteredRestaurants = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     const normalizedFilter = activeFilter.toLowerCase();
@@ -46,6 +48,13 @@ export function HomeRestaurantExplorer({ restaurants }: { restaurants: HomeResta
         ...restaurant,
         distanceKm: userLocation && hasCoordinates(restaurant) ? getDistanceKm(userLocation, restaurant) : null,
       }))
+      .filter((restaurant) => {
+        // When user clicked 'Near me', strictly filter within nearby radius
+        if (userLocation) {
+          return restaurant.distanceKm != null && restaurant.distanceKm <= MAX_NEARBY_RADIUS_KM;
+        }
+        return true;
+      })
       .sort((first, second) => {
         if (!userLocation) {
           return 0;
@@ -101,6 +110,12 @@ export function HomeRestaurantExplorer({ restaurants }: { restaurants: HomeResta
     setLocationStatus("idle");
   }
 
+  function clearLocation() {
+    setUserLocation(null);
+    setLocationMessage("");
+    setLocationStatus("idle");
+  }
+
   return (
     <>
       <form onSubmit={submitSearch} className="relative z-10 flex max-w-2xl flex-col gap-2 rounded-2xl border border-white/15 bg-[#0a1822]/90 p-2 shadow-2xl shadow-black/50 backdrop-blur-xl sm:flex-row focus-within:border-orange-500/50 transition-colors">
@@ -118,10 +133,14 @@ export function HomeRestaurantExplorer({ restaurants }: { restaurants: HomeResta
           variant="glass" 
           onClick={useCurrentLocation} 
           disabled={locationStatus === "loading"}
-          className="rounded-xl border-white/10 bg-white/[0.06] text-zinc-200 hover:bg-white/10 hover:text-white text-xs sm:text-sm"
+          className={`rounded-xl border text-xs sm:text-sm transition ${
+            userLocation
+              ? "border-emerald-500/50 bg-emerald-500/20 text-emerald-200"
+              : "border-white/10 bg-white/[0.06] text-zinc-200 hover:bg-white/10 hover:text-white"
+          }`}
         >
-          <LocateFixed className="h-4 w-4 text-amber-400 mr-1.5" />
-          {locationStatus === "loading" ? "Locating..." : "Near me"}
+          <LocateFixed className={`h-4 w-4 mr-1.5 ${userLocation ? "text-emerald-400 animate-pulse" : "text-amber-400"}`} />
+          {locationStatus === "loading" ? "Locating..." : userLocation ? "Near You Active" : "Near me"}
         </Button>
         <Button 
           type="submit" 
@@ -130,6 +149,26 @@ export function HomeRestaurantExplorer({ restaurants }: { restaurants: HomeResta
           Search
         </Button>
       </form>
+
+      {/* Active Location Filter Notification / Reset Badge */}
+      {userLocation && (
+        <div className="relative z-10 mt-3 flex items-center gap-2 text-xs text-emerald-300">
+          <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 font-semibold">
+            <MapPin className="h-3.5 w-3.5 text-emerald-400" />
+            Showing restaurants within {MAX_NEARBY_RADIUS_KM} km of your GPS location
+            <button
+              type="button"
+              onClick={clearLocation}
+              className="ml-1 inline-flex items-center gap-0.5 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] text-white hover:bg-white/20 transition"
+              title="Clear GPS Location"
+            >
+              <X className="h-3 w-3" />
+              Clear
+            </button>
+          </span>
+        </div>
+      )}
+
       {locationStatus === "failed" && locationMessage ? (
         <p className="relative z-10 mt-2 max-w-2xl text-sm leading-6 text-orange-200">
           {locationMessage}
@@ -156,7 +195,13 @@ export function HomeRestaurantExplorer({ restaurants }: { restaurants: HomeResta
       {restaurants.length > 0 ? (
         <>
           <div className="mt-10 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">{query.trim() || activeFilter !== "All" ? "Search results" : "Popular Restaurants"}</h2>
+            <h2 className="text-xl font-bold text-white">
+              {userLocation
+                ? `Restaurants Near You (${filteredRestaurants.length})`
+                : query.trim() || activeFilter !== "All"
+                ? "Search results"
+                : "Popular Restaurants"}
+            </h2>
             <Link href={buildSearchHref(query, userLocation)} className="text-sm font-semibold text-orange-300 hover:text-white transition">
               View All →
             </Link>
@@ -168,8 +213,25 @@ export function HomeRestaurantExplorer({ restaurants }: { restaurants: HomeResta
               ))}
             </div>
           ) : (
-            <div className="mt-4">
-              <EmptyState icon={Search} title="No restaurants found" description="Try another restaurant name, cuisine, city, or category." />
+            <div className="mt-4 rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center backdrop-blur-xl">
+              <EmptyState
+                icon={MapPin}
+                title={userLocation ? "No Restaurants Near You" : "No restaurants found"}
+                description={
+                  userLocation
+                    ? `We couldn't find any KhaoScan-enabled restaurants within ${MAX_NEARBY_RADIUS_KM} km of your current location.`
+                    : "Try another restaurant name, cuisine, city, or category."
+                }
+              />
+              {userLocation && (
+                <button
+                  type="button"
+                  onClick={clearLocation}
+                  className="mt-4 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:opacity-95"
+                >
+                  Browse All Restaurants Across India
+                </button>
+              )}
             </div>
           )}
         </>

@@ -33,6 +33,7 @@ type SearchRestaurant = {
 };
 
 const categories = ["All", "Pure Veg", "Cafe", "Family", "Fine Dining", "Desserts"];
+const MAX_NEARBY_RADIUS_KM = 35;
 
 export default async function RestaurantSearchPage({
   searchParams,
@@ -140,20 +141,46 @@ export default async function RestaurantSearchPage({
 
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-white">Restaurants</h2>
+            <h2 className="text-2xl font-bold text-white">
+              {userLocation ? "Restaurants Near You" : "Restaurants"}
+            </h2>
             <p className="mt-1 text-sm text-zinc-400">
-              {restaurants.length} {restaurants.length === 1 ? "restaurant" : "restaurants"} available
+              {userLocation
+                ? `Showing dining spots within ${MAX_NEARBY_RADIUS_KM} km of your location (${restaurants.length} found)`
+                : `${restaurants.length} ${restaurants.length === 1 ? "restaurant" : "restaurants"} available`}
             </p>
           </div>
+          {userLocation && (
+            <Link
+              href="/restaurants/search"
+              className="rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition"
+            >
+              Clear Location
+            </Link>
+          )}
         </div>
 
         {restaurants.length === 0 ? (
           <div className="mt-8 rounded-[28px] border border-white/10 bg-white/[0.02] p-10 text-center backdrop-blur-xl">
             <EmptyState
-              icon={Search}
-              title="No restaurants matched your search"
-              description="Try another area, city, cuisine, or category keyword."
+              icon={userLocation ? MapPin : Search}
+              title={userLocation ? "No Restaurants Near You" : "No restaurants matched your search"}
+              description={
+                userLocation
+                  ? `We couldn't find any KhaoScan-enabled restaurants within ${MAX_NEARBY_RADIUS_KM} km of your location.`
+                  : "Try another area, city, cuisine, or category keyword."
+              }
             />
+            {userLocation && (
+              <div className="mt-5">
+                <Link
+                  href="/restaurants/search"
+                  className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-2.5 text-xs font-bold text-white shadow-md transition hover:opacity-95"
+                >
+                  Browse All Restaurants Across India
+                </Link>
+              </div>
+            )}
           </div>
         ) : (
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -283,6 +310,13 @@ async function getRestaurants(query: string, category: string, userLocation: Coo
       availability: availability.get(restaurant.id) ?? emptyAvailability(),
     }))
     .filter((restaurant) => {
+      // When searching with GPS location, strictly filter restaurants within the nearby radius
+      if (userLocation) {
+        if (restaurant.distanceKm == null || restaurant.distanceKm > MAX_NEARBY_RADIUS_KM) {
+          return false;
+        }
+      }
+
       if (normalizedCategory !== "all") {
         const matchesCategory =
           restaurant.type.toLowerCase().includes(normalizedCategory) ||
